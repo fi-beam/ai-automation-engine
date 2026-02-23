@@ -1,7 +1,7 @@
 import express from 'express';
-import { PORT } from './core/config.js';
-import { info } from './core/logger.js';
-import healthRoute from './routes/health.route.js';
+import { PORT } from './core/config';
+import { info } from './core/logger';
+import healthRoute from './routes/health.route';
 
 const app = express();
 
