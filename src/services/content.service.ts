@@ -1,19 +1,17 @@
 import { generateText } from '../core/openai';
 
-export async function generateDailyPost(): Promise<string> {
-  const systemPrompt = `You are a high-performing personal brand strategist on X.
-Write concise, sharp, engaging content.
+const SYSTEM_PROMPT = `You are a high-performing personal brand strategist on X.
+Write sharp, concise, high-IQ posts.
 Maximum 280 characters.
 No emojis.
 No hashtags.`;
 
-  const userPrompt = 'Write one post about discipline and long-term dominance.';
+export async function generateDailyPost(): Promise<string> {
+  const userPrompt = 'Write one post about discipline, long-term dominance, or system thinking.';
+  
+  const prompt = `${SYSTEM_PROMPT}
 
-  const prompt = `System:
-${systemPrompt}
-
-User:
-${userPrompt}`;
+Topic: ${userPrompt}`;
 
   return generateText(prompt);
 }

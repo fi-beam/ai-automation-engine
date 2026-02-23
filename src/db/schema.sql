@@ -1,1 +1,7 @@
--- Placeholder schema
+CREATE TABLE IF NOT EXISTS posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT NOT NULL,
+  tweet_id TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  engagement_score INTEGER DEFAULT 0
+);
