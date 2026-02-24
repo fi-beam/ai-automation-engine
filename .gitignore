@@ -39,3 +39,6 @@ tmp/
 # Database
 *.db
 *.sqlite
+
+# Keep for local dev
+data/
