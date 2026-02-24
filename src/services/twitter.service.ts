@@ -1,31 +1,33 @@
 import { TwitterApi } from 'twitter-api-v2';
-import { error } from '../core/logger';
+import { error, info } from '../core/logger';
 
-// Try OAuth 1.0a first (for bots)
-const oauth1Client = process.env.TWITTER_ACCESS_TOKEN
-  ? new TwitterApi({
-      appKey: process.env.TWITTER_API_KEY!,
-      appSecret: process.env.TWITTER_API_SECRET!,
-      accessToken: process.env.TWITTER_ACCESS_TOKEN,
-      accessSecret: process.env.TWITTER_ACCESS_SECRET,
-    })
-  : null;
+const apiKey = process.env.TWITTER_API_KEY;
+const apiSecret = process.env.TWITTER_API_SECRET;
+const accessToken = process.env.TWITTER_ACCESS_TOKEN;
+const accessSecret = process.env.TWITTER_ACCESS_SECRET;
 
-// OAuth 2.0 Bearer token (read-only mostly)
-const bearerClient = process.env.TWITTER_BEARER_TOKEN
-  ? new TwitterApi(process.env.TWITTER_BEARER_TOKEN)
-  : null;
+if (!apiKey || !apiSecret || !accessToken || !accessSecret) {
+  error('Missing Twitter OAuth 1.0a credentials');
+}
+
+const client = new TwitterApi({
+  appKey: apiKey!,
+  appSecret: apiSecret!,
+  accessToken: accessToken!,
+  accessSecret: accessSecret!,
+});
 
 export async function postTweet(text: string): Promise<string | null> {
   try {
-    if (!oauth1Client) {
-      throw new Error('TWITTER_ACCESS_TOKEN and TWITTER_ACCESS_SECRET required to post tweets. Get them from Twitter Developer Portal > Keys and Tokens > Generate');
-    }
-    
-    const tweet = await oauth1Client.v2.tweet(text);
+    info(`Posting tweet with OAuth 1.0a for user`);
+    const tweet = await client.v2.tweet(text);
+    info(`Tweet posted: ${tweet.data.id}`);
     return tweet.data.id;
-  } catch (err) {
-    error(`Failed to post tweet: ${err instanceof Error ? err.message : String(err)}`);
+  } catch (err: any) {
+    error(`Twitter API error: ${err.message}`);
+    if (err.code === 403) {
+      error('403 Forbidden: Check app permissions (need Write access) and token validity');
+    }
     throw err;
   }
 }
