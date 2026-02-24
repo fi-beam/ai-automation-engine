@@ -11,8 +11,18 @@ router.post('/webhook/post', async (_req: Request, res: Response) => {
     info('Webhook triggered: manual post');
 
     const content = await generateDailyPost();
+    info(`Content generated (${content.length} chars): ${content.substring(0, 50)}...`);
+
     const tweetId = await postTweet(content);
+    
+    if (tweetId) {
+      info(`Posted to Twitter: ${tweetId}`);
+    } else {
+      info('Twitter posting skipped (requires paid tier) - content saved to DB');
+    }
+
     await savePost(content, tweetId);
+    info('Post saved to database');
 
     info('Webhook post completed successfully');
 
@@ -20,6 +30,7 @@ router.post('/webhook/post', async (_req: Request, res: Response) => {
       success: true,
       content,
       tweetId,
+      postedToTwitter: !!tweetId,
     });
   } catch (err) {
     error(`Webhook post failed: ${err instanceof Error ? err.message : String(err)}`);
