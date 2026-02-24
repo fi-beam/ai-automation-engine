@@ -1,17 +1,28 @@
 import { TwitterApi } from 'twitter-api-v2';
-import { TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET } from '../core/config';
 import { error } from '../core/logger';
 
-const client = new TwitterApi({
-  appKey: TWITTER_API_KEY!,
-  appSecret: TWITTER_API_SECRET!,
-  accessToken: TWITTER_ACCESS_TOKEN!,
-  accessSecret: TWITTER_ACCESS_SECRET!,
-});
+// Try OAuth 1.0a first (for bots)
+const oauth1Client = process.env.TWITTER_ACCESS_TOKEN
+  ? new TwitterApi({
+      appKey: process.env.TWITTER_API_KEY!,
+      appSecret: process.env.TWITTER_API_SECRET!,
+      accessToken: process.env.TWITTER_ACCESS_TOKEN,
+      accessSecret: process.env.TWITTER_ACCESS_SECRET,
+    })
+  : null;
+
+// OAuth 2.0 Bearer token (read-only mostly)
+const bearerClient = process.env.TWITTER_BEARER_TOKEN
+  ? new TwitterApi(process.env.TWITTER_BEARER_TOKEN)
+  : null;
 
 export async function postTweet(text: string): Promise<string | null> {
   try {
-    const tweet = await client.v2.tweet(text);
+    if (!oauth1Client) {
+      throw new Error('TWITTER_ACCESS_TOKEN and TWITTER_ACCESS_SECRET required to post tweets. Get them from Twitter Developer Portal > Keys and Tokens > Generate');
+    }
+    
+    const tweet = await oauth1Client.v2.tweet(text);
     return tweet.data.id;
   } catch (err) {
     error(`Failed to post tweet: ${err instanceof Error ? err.message : String(err)}`);
