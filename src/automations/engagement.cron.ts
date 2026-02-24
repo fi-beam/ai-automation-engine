@@ -3,6 +3,7 @@ import { updateEngagementMetrics } from '../services/analytics.service';
 import { info, error } from '../core/logger';
 
 export function startEngagementAutomation(): void {
+  // Run every 6 hours
   cron.schedule('0 */6 * * *', async () => {
     try {
       info('Starting engagement update automation');
